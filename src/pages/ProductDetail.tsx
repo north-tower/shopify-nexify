@@ -22,16 +22,17 @@ const ProductDetail = () => {
   const { id } = useParams();
   const [quantity, setQuantity] = useState(1);
 
-  const { data: product, isLoading } = useQuery({
+  const { data: product, isLoading, error } = useQuery({
     queryKey: ["product", id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
         .select("*")
-        .eq("id", parseInt(id as string)) // Convert string id to number
-        .single();
+        .eq("id", parseInt(id as string))
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error("Product not found");
       return data;
     },
   });
@@ -56,14 +57,14 @@ const ProductDetail = () => {
     );
   }
 
-  if (!product) {
+  if (error || !product) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900">Product not found</h2>
-            <p className="mt-2 text-gray-600">The product you're looking for doesn't exist.</p>
+            <p className="mt-2 text-gray-600">The product you're looking for doesn't exist or has been removed.</p>
           </div>
         </div>
       </div>
