@@ -2,52 +2,25 @@ import Navbar from "@/components/Navbar";
 import CategorySidebar from "@/components/CategorySidebar";
 import FlashSales from "@/components/FlashSales";
 import ProductCard from "@/components/ProductCard";
-
-// Sample products data
-const products = [
-  {
-    id: 1,
-    title: "Hisense 94 Liters Single Door Refrigerator",
-    price: 16499,
-    originalPrice: 22999,
-    image: "/placeholder.svg",
-    discount: 28,
-  },
-  {
-    id: 2,
-    title: "Vision Plus 32\" Digital HD LED TV",
-    price: 9599,
-    originalPrice: 15999,
-    image: "/placeholder.svg",
-    discount: 40,
-  },
-  {
-    id: 3,
-    title: "Nunix 50 * 60cm Cooker",
-    price: 22990,
-    originalPrice: 25000,
-    image: "/placeholder.svg",
-    discount: 8,
-  },
-  {
-    id: 4,
-    title: "Infinix Smart 8 6.6\" HD+",
-    price: 8999,
-    originalPrice: 10000,
-    image: "/placeholder.svg",
-    discount: 10,
-  },
-  {
-    id: 5,
-    title: "Bluetooth Selfie Stick Tripod",
-    price: 275,
-    originalPrice: 550,
-    image: "/placeholder.svg",
-    discount: 50,
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const Index = () => {
+  const { data: products, isLoading, error } = useQuery({
+    queryKey: ['products'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*');
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -65,11 +38,37 @@ const Index = () => {
             {/* Products Grid */}
             <div className="mt-8">
               <h2 className="text-xl font-bold mb-6">Featured Products</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {products.map((product) => (
-                  <ProductCard key={product.id} {...product} />
-                ))}
-              </div>
+              
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="space-y-4">
+                      <Skeleton className="h-48 w-full" />
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
+                  ))}
+                </div>
+              ) : error ? (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Failed to load products. Please try again later.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {products?.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      id={product.id}
+                      title={product.product_name}
+                      price={Number(product.price)}
+                      image={product.photo_url || '/placeholder.svg'}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
