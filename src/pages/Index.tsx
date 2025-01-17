@@ -12,14 +12,19 @@ const Index = () => {
   const { data: products, isLoading, error } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*');
-      
+      const { data, error } = await supabase.from('products').select('*');
+      console.log("Supabase Response:", { data, error });
       if (error) throw error;
       return data;
     },
   });
+  
+  console.log("Products:", products);
+  console.error("Error:", error);
+  
+
+
+  console.log(products)
 
   return (
     <div className="min-h-screen bg-gray-50">
