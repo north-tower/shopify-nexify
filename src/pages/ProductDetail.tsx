@@ -28,7 +28,7 @@ const ProductDetail = () => {
       const { data, error } = await supabase
         .from("products")
         .select("*")
-        .eq("id", id)
+        .eq("id", parseInt(id as string)) // Convert string id to number
         .single();
 
       if (error) throw error;
