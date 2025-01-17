@@ -5,21 +5,21 @@ import {
   ShoppingBag,
   Heart,
   Laptop,
-  ShirtIcon,
+  Shirt,
   Baby,
-  Football
+  Dumbbell
 } from "lucide-react";
 
 const categories = [
   { name: "Electronics", icon: Smartphone },
   { name: "TV & Audio", icon: Tv },
   { name: "Home & Office", icon: Home },
-  { name: "Fashion", icon: ShirtIcon },
+  { name: "Fashion", icon: Shirt },
   { name: "Health & Beauty", icon: Heart },
   { name: "Computing", icon: Laptop },
   { name: "Supermarket", icon: ShoppingBag },
   { name: "Baby Products", icon: Baby },
-  { name: "Sporting Goods", icon: Football },
+  { name: "Sporting Goods", icon: Dumbbell },
 ];
 
 const CategorySidebar = () => {
