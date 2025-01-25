@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
 import { ShoppingCart, Star } from "lucide-react";
 import { toast } from "sonner";
+import { useCartStore } from "@/store/useCartStore";
 
 interface ProductCardProps {
   id?: number;
@@ -26,10 +27,19 @@ const ProductCard = ({
   ratings = 0,
   reviews_count = 0
 }: ProductCardProps) => {
+  const addItem = useCartStore((state) => state.addItem);
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation when clicking the button
-    toast.success("Added to cart successfully!");
-    // TODO: Implement actual cart functionality
+    if (id) {
+      addItem({
+        id,
+        title,
+        price,
+        image,
+      });
+      toast.success("Added to cart successfully!");
+    }
   };
 
   return (
