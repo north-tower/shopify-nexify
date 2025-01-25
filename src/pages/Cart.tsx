@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { useCartStore } from "@/store/useCartStore";
 import { Button } from "@/components/ui/button";
@@ -9,15 +9,11 @@ import { toast } from "sonner";
 const Cart = () => {
   const { items, removeItem, updateQuantity, getTotalPrice, clearCart } = useCartStore();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const navigate = useNavigate();
 
   const handleCheckout = () => {
     setIsCheckingOut(true);
-    // Simulate checkout process
-    setTimeout(() => {
-      clearCart();
-      toast.success("Order placed successfully!");
-      setIsCheckingOut(false);
-    }, 2000);
+    navigate('/checkout');
   };
 
   if (items.length === 0) {
