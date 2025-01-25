@@ -38,7 +38,7 @@ export const ProductActions = ({
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
-          user_id: user.id,
+          user_id: parseInt(user.id), // Convert UUID to number
           order_number: `ORD-${Date.now()}`,
           total_amount: price * quantity,
           shipping_address: {},
