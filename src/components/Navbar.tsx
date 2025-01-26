@@ -2,9 +2,13 @@ import { Search, ShoppingCart, User, Menu } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useCartStore } from "@/store/useCartStore";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const cartItems = useCartStore((state) => state.items);
+  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   return (
     <nav className="bg-white border-b">
@@ -12,10 +16,15 @@ const Navbar = () => {
         {/* Main Navbar */}
         <div className="h-16 flex items-center justify-between">
           {/* Left Section - Logo */}
-          <div className="flex items-center">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              ShopEase
-            </h1>
+          <div className="flex items-center space-x-6">
+            <Link to="/">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                ShopEase
+              </h1>
+            </Link>
+            <Link to="/deals" className="hidden md:block text-sm font-medium hover:text-primary transition-colors">
+              Deals
+            </Link>
           </div>
 
           {/* Center Section - Search (Hidden on mobile) */}
@@ -41,16 +50,20 @@ const Navbar = () => {
                 <span className="hidden sm:inline">Account</span>
               </Button>
               
-              <Button 
-                variant="ghost"
-                className="hover:bg-primary/10 transition-colors relative"
-              >
-                <ShoppingCart className="h-5 w-5 mr-2" />
-                <span className="hidden sm:inline">Cart</span>
-                <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  3
-                </span>
-              </Button>
+              <Link to="/cart">
+                <Button 
+                  variant="ghost"
+                  className="hover:bg-primary/10 transition-colors relative"
+                >
+                  <ShoppingCart className="h-5 w-5 mr-2" />
+                  <span className="hidden sm:inline">Cart</span>
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {cartCount}
+                    </span>
+                  )}
+                </Button>
+              </Link>
             </div>
 
             {/* Mobile Menu Button */}
@@ -77,14 +90,26 @@ const Navbar = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             </div>
             <div className="flex flex-col space-y-2">
+              <Link to="/deals">
+                <Button variant="ghost" className="w-full justify-start">
+                  Deals
+                </Button>
+              </Link>
               <Button variant="ghost" className="justify-start">
                 <User className="h-5 w-5 mr-2" />
                 Account
               </Button>
-              <Button variant="ghost" className="justify-start">
-                <ShoppingCart className="h-5 w-5 mr-2" />
-                Cart
-              </Button>
+              <Link to="/cart">
+                <Button variant="ghost" className="w-full justify-start relative">
+                  <ShoppingCart className="h-5 w-5 mr-2" />
+                  Cart
+                  {cartCount > 0 && (
+                    <span className="absolute top-2 left-8 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {cartCount}
+                    </span>
+                  )}
+                </Button>
+              </Link>
             </div>
           </div>
         )}

@@ -8,10 +8,10 @@ import ProductDetail from "./pages/ProductDetail";
 import CategoryPage from "./pages/CategoryPage";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
+import Deals from "./pages/Deals";
 import { useState } from "react";
 
 const App = () => {
-  // Create a client
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
@@ -34,6 +34,7 @@ const App = () => {
             <Route path="/category/:category/:subcategory" element={<CategoryPage />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/deals" element={<Deals />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
