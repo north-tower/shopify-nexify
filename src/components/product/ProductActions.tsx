@@ -73,24 +73,26 @@ export const ProductActions = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 bg-white dark:bg-gray-950 rounded-xl p-6 shadow-sm">
       <div className="flex items-center space-x-4">
-        <span className="text-gray-600">Quantity:</span>
-        <div className="flex items-center space-x-2">
+        <span className="text-gray-700 dark:text-gray-300 font-medium">Quantity:</span>
+        <div className="flex items-center space-x-2 bg-purple-50 dark:bg-gray-900 p-1 rounded-lg">
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={() => setQuantity(Math.max(minimumOrder, quantity - 1))}
             disabled={quantity <= minimumOrder}
+            className="hover:bg-purple-100 dark:hover:bg-gray-800"
           >
             -
           </Button>
-          <span className="w-12 text-center">{quantity}</span>
+          <span className="w-12 text-center font-medium">{quantity}</span>
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={() => setQuantity(Math.min(stockQuantity, quantity + 1))}
             disabled={quantity >= stockQuantity}
+            className="hover:bg-purple-100 dark:hover:bg-gray-800"
           >
             +
           </Button>
@@ -99,7 +101,7 @@ export const ProductActions = ({
 
       <div className="flex space-x-4">
         <Button
-          className="flex-1"
+          className="flex-1 shadow-lg shadow-primary/20 hover:shadow-primary/10 transition-shadow"
           onClick={() => {
             toast.success("Added to cart successfully!");
           }}
@@ -108,7 +110,7 @@ export const ProductActions = ({
         </Button>
         <Button
           variant="secondary"
-          className="flex-1"
+          className="flex-1 shadow-lg shadow-secondary/20 hover:shadow-secondary/10 transition-shadow"
           onClick={handleBuyNow}
           disabled={stockQuantity < minimumOrder}
         >
@@ -117,7 +119,7 @@ export const ProductActions = ({
       </div>
 
       {stockQuantity < minimumOrder && (
-        <p className="text-destructive text-sm">
+        <p className="text-destructive text-sm bg-destructive/10 p-3 rounded-lg">
           This product is currently out of stock
         </p>
       )}

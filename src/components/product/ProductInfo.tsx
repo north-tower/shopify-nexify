@@ -19,11 +19,11 @@ export const ProductInfo = ({
   minimumOrder = 1,
 }: ProductInfoProps) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 bg-white dark:bg-gray-950 rounded-xl p-6 shadow-sm">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">{name}</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">{name}</h1>
         <div className="flex items-center space-x-4">
-          <div className="flex items-center">
+          <div className="flex items-center bg-purple-50 dark:bg-gray-900 px-3 py-1.5 rounded-lg">
             {[1, 2, 3, 4, 5].map((star) => (
               <Star
                 key={star}
@@ -34,7 +34,7 @@ export const ProductInfo = ({
                 }`}
               />
             ))}
-            <span className="ml-2 text-sm text-gray-600">
+            <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               ({reviewsCount || 0} reviews)
             </span>
           </div>
@@ -42,16 +42,16 @@ export const ProductInfo = ({
       </div>
 
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-3xl font-bold text-primary">
+        <div className="space-y-4">
+          <p className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             KSh {price?.toLocaleString()}
           </p>
-          <div className="flex gap-2 mt-2">
-            <Badge variant="secondary">
-              Stock: {stockQuantity} available
+          <div className="flex gap-3">
+            <Badge variant="secondary" className="px-3 py-1">
+              {stockQuantity} in stock
             </Badge>
-            <Badge variant="outline">
-              Min order: {minimumOrder} piece(s)
+            <Badge variant="outline" className="px-3 py-1">
+              Min order: {minimumOrder}
             </Badge>
           </div>
         </div>

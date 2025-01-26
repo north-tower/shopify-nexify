@@ -69,9 +69,9 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-purple-50/50 to-white dark:from-gray-950 dark:to-gray-900">
       <Navbar />
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <ProductGallery
             imageUrl={product.photo_url}
@@ -98,25 +98,33 @@ const ProductDetail = () => {
             />
 
             <Tabs defaultValue="description" className="w-full">
-              <TabsList className="w-full">
-                <TabsTrigger value="description" className="flex-1">
+              <TabsList className="w-full bg-white dark:bg-gray-950 p-1 rounded-xl">
+                <TabsTrigger value="description" className="flex-1 rounded-lg">
                   Description
                 </TabsTrigger>
-                <TabsTrigger value="specifications" className="flex-1">
+                <TabsTrigger value="specifications" className="flex-1 rounded-lg">
                   Specifications
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="description" className="mt-4">
-                <Card>
+              <TabsContent value="description" className="mt-6">
+                <Card className="border-none bg-white dark:bg-gray-950 shadow-sm">
                   <CardContent className="pt-6">
-                    <p className="text-gray-600">{product.description}</p>
+                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                      {product.description}
+                    </p>
                     {product.features && product.features.length > 0 && (
-                      <div className="mt-4">
-                        <h3 className="font-semibold mb-2">Key Features:</h3>
-                        <ul className="list-disc pl-5 space-y-1">
+                      <div className="mt-6">
+                        <h3 className="font-semibold mb-4 text-gray-900 dark:text-gray-100">
+                          Key Features
+                        </h3>
+                        <ul className="grid gap-3">
                           {product.features.map((feature, index) => (
-                            <li key={index} className="text-gray-600">
-                              {feature}
+                            <li
+                              key={index}
+                              className="flex items-center space-x-3 text-gray-600 dark:text-gray-400"
+                            >
+                              <span className="h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" />
+                              <span>{feature}</span>
                             </li>
                           ))}
                         </ul>
@@ -125,8 +133,8 @@ const ProductDetail = () => {
                   </CardContent>
                 </Card>
               </TabsContent>
-              <TabsContent value="specifications" className="mt-4">
-                <Card>
+              <TabsContent value="specifications" className="mt-6">
+                <Card className="border-none bg-white dark:bg-gray-950 shadow-sm">
                   <CardContent className="pt-6">
                     {product.specifications && (
                       <div className="space-y-4">
@@ -134,12 +142,12 @@ const ProductDetail = () => {
                           ([key, value]) => (
                             <div
                               key={key}
-                              className="grid grid-cols-2 gap-4 py-2 border-b last:border-0"
+                              className="grid grid-cols-2 gap-4 py-3 border-b last:border-0"
                             >
-                              <span className="font-medium text-gray-900">
+                              <span className="font-medium text-gray-900 dark:text-gray-100">
                                 {key}
                               </span>
-                              <span className="text-gray-600">
+                              <span className="text-gray-600 dark:text-gray-400">
                                 {String(value)}
                               </span>
                             </div>
