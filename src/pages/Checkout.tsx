@@ -8,6 +8,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import Navbar from "@/components/Navbar";
 import { MinusIcon, PlusIcon } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 interface CheckoutFormData {
   email: string;
@@ -24,10 +27,21 @@ interface CheckoutFormData {
 }
 
 const Checkout = () => {
-  const { items, getTotalPrice } = useCartStore();
+  const { items, getTotalPrice, clearCart } = useCartStore();
   const [tipAmount, setTipAmount] = useState<number>(0);
   const [customTip, setCustomTip] = useState<number>(0);
-  const shippingCost = 250; // Fixed shipping cost of KSh 250
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+  const shippingCost = 250;
+
+  // Get current user
+  const { data: session } = useQuery({
+    queryKey: ['session'],
+    queryFn: async () => {
+      const { data } = await supabase.auth.getSession();
+      return data.session;
+    },
+  });
 
   const { register, handleSubmit, watch } = useForm<CheckoutFormData>({
     defaultValues: {
@@ -48,17 +62,84 @@ const Checkout = () => {
 
   const handleCustomTipChange = (value: number) => {
     setCustomTip(value);
-    setTipAmount(0); // Reset percentage selection when using custom tip
+    setTipAmount(0);
   };
 
   const calculateTotal = () => {
     return getTotalPrice() + shippingCost + customTip;
   };
 
-  const onSubmit = (data: CheckoutFormData) => {
-    console.log("Form data:", data);
-    toast.success("Order placed successfully!");
-    // Here you would typically handle payment processing
+  const onSubmit = async (data: CheckoutFormData) => {
+    if (!session?.user) {
+      toast.error("Please login to complete your order");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      // Create shipping address object
+      const shippingAddress = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        address: data.address,
+        city: data.city,
+        postalCode: data.postalCode,
+        country: data.country,
+        phone: data.phone,
+      };
+
+      // Use shipping address as billing if not using different billing
+      const billingAddress = data.useDifferentBilling 
+        ? { ...shippingAddress } // You would need to collect billing address separately if different
+        : shippingAddress;
+
+      // Create order
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          user_id: parseInt(session.user.id),
+          order_number: `ORD-${Date.now()}`,
+          total_amount: calculateTotal(),
+          shipping_address: shippingAddress,
+          billing_address: billingAddress,
+          order_status: 'pending',
+          payment_status: 'unpaid',
+          payment_method: 'pending'
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // Create order items
+      const orderItems = items.map(item => ({
+        order_id: orderData.id,
+        product_id: item.id,
+        product_name: item.title,
+        sku: `SKU-${item.id}`,
+        price: item.price,
+        quantity: item.quantity,
+        total_price: item.price * item.quantity
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
+
+      // Clear cart and show success message
+      clearCart();
+      toast.success("Order placed successfully!");
+      navigate('/');
+
+    } catch (error) {
+      console.error('Error creating order:', error);
+      toast.error("Failed to place order. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -335,8 +416,9 @@ const Checkout = () => {
                   className="w-full"
                   size="lg"
                   onClick={handleSubmit(onSubmit)}
+                  disabled={isSubmitting}
                 >
-                  Pay now
+                  {isSubmitting ? "Processing..." : "Pay now"}
                 </Button>
               </div>
             </div>
