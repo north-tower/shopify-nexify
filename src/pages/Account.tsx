@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { User } from "@supabase/supabase-js";
@@ -193,174 +194,177 @@ const Account = () => {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-8">My Account</h1>
-      
-      <div className="grid gap-8 md:grid-cols-2">
-        {/* Profile Information */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Profile Information</CardTitle>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setEditMode(!editMode)}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-            </div>
-            <CardDescription>
-              Manage your profile information
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {/* Avatar Section */}
-              <div className="flex items-center space-x-4">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src={profile?.avatar_url || ""} />
-                  <AvatarFallback>
-                    <UserIcon className="h-10 w-10" />
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <Label htmlFor="avatar" className="cursor-pointer">
-                    <div className="flex items-center space-x-2">
-                      <Camera className="h-4 w-4" />
-                      <span>Change avatar</span>
-                    </div>
-                  </Label>
-                  <Input
-                    id="avatar"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleAvatarUpload}
-                    disabled={updating}
-                  />
-                </div>
+    <>
+      <Navbar />
+      <div className="container mx-auto py-8 px-4">
+        <h1 className="text-3xl font-bold mb-8">My Account</h1>
+        
+        <div className="grid gap-8 md:grid-cols-2">
+          {/* Profile Information */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Profile Information</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setEditMode(!editMode)}
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
               </div>
-
-              <Separator />
-
-              {editMode ? (
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="full_name">Full Name</Label>
-                    <Input
-                      id="full_name"
-                      value={formData.full_name}
-                      onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="username">Username</Label>
-                    <Input
-                      id="username"
-                      value={formData.username}
-                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="website">Website</Label>
-                    <Input
-                      id="website"
-                      value={formData.website}
-                      onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                    />
-                  </div>
-                  <Button
-                    onClick={handleProfileUpdate}
-                    disabled={updating}
-                    className="w-full"
-                  >
-                    {updating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Changes
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <UserIcon className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">
-                      {profile?.full_name || "No name set"}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span>{user?.email}</span>
-                  </div>
-                  {profile?.website && (
-                    <div className="flex items-center space-x-2">
-                      <Globe className="h-4 w-4 text-muted-foreground" />
-                      <a
-                        href={profile.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        {profile.website}
-                      </a>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Order History */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Order History</CardTitle>
               <CardDescription>
-                View your recent orders
+                Manage your profile information
               </CardDescription>
-            </div>
-            <Package className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {orders.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">No orders found</p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Order #</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {orders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-medium">{order.order_number}</TableCell>
-                      <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          order.order_status === 'completed' ? 'bg-green-100 text-green-800' :
-                          order.order_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {order.order_status}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        ${order.total_amount.toFixed(2)}
-                      </TableCell>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {/* Avatar Section */}
+                <div className="flex items-center space-x-4">
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage src={profile?.avatar_url || ""} />
+                    <AvatarFallback>
+                      <UserIcon className="h-10 w-10" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <Label htmlFor="avatar" className="cursor-pointer">
+                      <div className="flex items-center space-x-2">
+                        <Camera className="h-4 w-4" />
+                        <span>Change avatar</span>
+                      </div>
+                    </Label>
+                    <Input
+                      id="avatar"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarUpload}
+                      disabled={updating}
+                    />
+                  </div>
+                </div>
+
+                <Separator />
+
+                {editMode ? (
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="full_name">Full Name</Label>
+                      <Input
+                        id="full_name"
+                        value={formData.full_name}
+                        onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="username">Username</Label>
+                      <Input
+                        id="username"
+                        value={formData.username}
+                        onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="website">Website</Label>
+                      <Input
+                        id="website"
+                        value={formData.website}
+                        onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                      />
+                    </div>
+                    <Button
+                      onClick={handleProfileUpdate}
+                      disabled={updating}
+                      className="w-full"
+                    >
+                      {updating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      <Save className="mr-2 h-4 w-4" />
+                      Save Changes
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <UserIcon className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">
+                        {profile?.full_name || "No name set"}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <span>{user?.email}</span>
+                    </div>
+                    {profile?.website && (
+                      <div className="flex items-center space-x-2">
+                        <Globe className="h-4 w-4 text-muted-foreground" />
+                        <a
+                          href={profile.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          {profile.website}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Order History */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Order History</CardTitle>
+                <CardDescription>
+                  View your recent orders
+                </CardDescription>
+              </div>
+              <Package className="h-5 w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {orders.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">No orders found</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Order #</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {orders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-medium">{order.order_number}</TableCell>
+                        <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            order.order_status === 'completed' ? 'bg-green-100 text-green-800' :
+                            order.order_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {order.order_status}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          ${order.total_amount.toFixed(2)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
