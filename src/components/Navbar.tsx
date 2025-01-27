@@ -1,14 +1,47 @@
-import { Search, ShoppingCart, User, Menu } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useCartStore } from "@/store/useCartStore";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "./ui/use-toast";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const cartItems = useCartStore((state) => state.items);
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate("/");
+      toast({
+        title: "Signed out successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error signing out",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <nav className="bg-white border-b">
@@ -42,13 +75,37 @@ const Navbar = () => {
           {/* Right Section - Actions */}
           <div className="flex items-center space-x-2">
             <div className="hidden sm:flex items-center space-x-2">
-              <Button 
-                variant="ghost" 
-                className="hover:bg-primary/10 transition-colors"
-              >
-                <User className="h-5 w-5 mr-2" />
-                <span className="hidden sm:inline">Account</span>
-              </Button>
+              {user ? (
+                <>
+                  <Link to="/account">
+                    <Button 
+                      variant="ghost" 
+                      className="hover:bg-primary/10 transition-colors"
+                    >
+                      <User className="h-5 w-5 mr-2" />
+                      <span className="hidden sm:inline">Account</span>
+                    </Button>
+                  </Link>
+                  <Button 
+                    variant="ghost" 
+                    className="hover:bg-primary/10 transition-colors"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="h-5 w-5 mr-2" />
+                    <span className="hidden sm:inline">Sign Out</span>
+                  </Button>
+                </>
+              ) : (
+                <Link to="/auth">
+                  <Button 
+                    variant="ghost" 
+                    className="hover:bg-primary/10 transition-colors"
+                  >
+                    <User className="h-5 w-5 mr-2" />
+                    <span className="hidden sm:inline">Sign In</span>
+                  </Button>
+                </Link>
+              )}
               
               <Link to="/cart">
                 <Button 
@@ -95,10 +152,31 @@ const Navbar = () => {
                   Deals
                 </Button>
               </Link>
-              <Button variant="ghost" className="justify-start">
-                <User className="h-5 w-5 mr-2" />
-                Account
-              </Button>
+              {user ? (
+                <>
+                  <Link to="/account">
+                    <Button variant="ghost" className="w-full justify-start">
+                      <User className="h-5 w-5 mr-2" />
+                      Account
+                    </Button>
+                  </Link>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="h-5 w-5 mr-2" />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <Link to="/auth">
+                  <Button variant="ghost" className="w-full justify-start">
+                    <User className="h-5 w-5 mr-2" />
+                    Sign In
+                  </Button>
+                </Link>
+              )}
               <Link to="/cart">
                 <Button variant="ghost" className="w-full justify-start relative">
                   <ShoppingCart className="h-5 w-5 mr-2" />

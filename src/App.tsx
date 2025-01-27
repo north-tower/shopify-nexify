@@ -10,6 +10,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Deals from "./pages/Deals";
 import Account from "./pages/Account";
+import Auth from "./pages/Auth";
 import { useState } from "react";
 
 const App = () => {
@@ -37,6 +38,7 @@ const App = () => {
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/deals" element={<Deals />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/auth" element={<Auth />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
