@@ -94,11 +94,14 @@ const Checkout = () => {
         ? { ...shippingAddress } 
         : shippingAddress;
 
+      // Convert UUID to a numeric ID within safe bigint range
+      const numericId = Number(BigInt('0x' + session.user.id.replace(/-/g, '')) % BigInt(Number.MAX_SAFE_INTEGER));
+
       // Create order with numeric user_id
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
-          user_id: parseInt(session.user.id.replace(/-/g, ''), 16) % 1000000, // Convert UUID to a smaller number
+          user_id: numericId,
           order_number: `ORD-${Date.now()}`,
           total_amount: calculateTotal(),
           shipping_address: shippingAddress,
