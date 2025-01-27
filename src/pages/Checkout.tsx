@@ -34,7 +34,6 @@ const Checkout = () => {
   const navigate = useNavigate();
   const shippingCost = 250;
 
-  // Get current user
   const { data: session } = useQuery({
     queryKey: ['session'],
     queryFn: async () => {
@@ -94,10 +93,12 @@ const Checkout = () => {
         ? { ...shippingAddress } 
         : shippingAddress;
 
-      // Convert UUID to a numeric ID within safe bigint range
-      const numericId = Number(BigInt('0x' + session.user.id.replace(/-/g, '')) % BigInt(Number.MAX_SAFE_INTEGER));
+      // Convert UUID to numeric ID using the same method as RLS policy
+      const numericId = Number(
+        BigInt('0x' + session.user.id.replace(/-/g, '')) % BigInt(9223372036854775807)
+      );
 
-      // Create order with numeric user_id
+      // Create order
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
