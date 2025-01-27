@@ -40,18 +40,51 @@ const Auth = () => {
             },
           },
         });
-        if (error) throw error;
-        toast({
-          title: "Success!",
-          description: "Please check your email to verify your account.",
-        });
+        
+        if (error) {
+          if (error.message.includes("User already registered")) {
+            toast({
+              title: "Account already exists",
+              description: "Please sign in instead or use a different email.",
+              variant: "destructive",
+            });
+            setIsSignUp(false); // Switch to sign in mode
+          } else {
+            toast({
+              title: "Sign up failed",
+              description: error.message,
+              variant: "destructive",
+            });
+          }
+        } else {
+          toast({
+            title: "Success!",
+            description: "Please check your email to verify your account.",
+          });
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        if (error) throw error;
-        navigate("/");
+        
+        if (error) {
+          if (error.message.includes("Invalid login credentials")) {
+            toast({
+              title: "Invalid credentials",
+              description: "Please check your email and password and try again.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Sign in failed",
+              description: error.message,
+              variant: "destructive",
+            });
+          }
+        } else {
+          navigate("/");
+        }
       }
     } catch (error: any) {
       toast({
@@ -112,6 +145,7 @@ const Auth = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="pl-10"
                 required
+                minLength={6}
               />
             </div>
             <Button
