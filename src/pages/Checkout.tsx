@@ -91,14 +91,14 @@ const Checkout = () => {
 
       // Use shipping address as billing if not using different billing
       const billingAddress = data.useDifferentBilling 
-        ? { ...shippingAddress } // You would need to collect billing address separately if different
+        ? { ...shippingAddress } 
         : shippingAddress;
 
-      // Create order
+      // Create order with the correct user_id format
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
-          user_id: parseInt(session.user.id),
+          user_id: session.user.id, // Use the UUID directly, no need to parse as integer
           order_number: `ORD-${Date.now()}`,
           total_amount: calculateTotal(),
           shipping_address: shippingAddress,
@@ -110,7 +110,10 @@ const Checkout = () => {
         .select()
         .single();
 
-      if (orderError) throw orderError;
+      if (orderError) {
+        console.error('Order creation error:', orderError);
+        throw orderError;
+      }
 
       // Create order items
       const orderItems = items.map(item => ({
@@ -127,7 +130,10 @@ const Checkout = () => {
         .from('order_items')
         .insert(orderItems);
 
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        console.error('Order items creation error:', itemsError);
+        throw itemsError;
+      }
 
       // Clear cart and show success message
       clearCart();
