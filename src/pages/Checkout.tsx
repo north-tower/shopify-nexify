@@ -94,11 +94,11 @@ const Checkout = () => {
         ? { ...shippingAddress } 
         : shippingAddress;
 
-      // Create order with the correct user_id format
+      // Create order with numeric user_id
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
-          user_id: session.user.id, // Use the UUID directly, no need to parse as integer
+          user_id: parseInt(session.user.id.replace(/-/g, ''), 16) % 1000000, // Convert UUID to a smaller number
           order_number: `ORD-${Date.now()}`,
           total_amount: calculateTotal(),
           shipping_address: shippingAddress,
