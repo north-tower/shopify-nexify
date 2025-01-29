@@ -38,7 +38,7 @@ export const ProductActions = ({
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
-          user_id: parseInt(user.id), // Convert UUID to number
+          user_id: parseInt(user.id),
           order_number: `ORD-${Date.now()}`,
           total_amount: price * quantity,
           shipping_address: {},
@@ -73,16 +73,16 @@ export const ProductActions = ({
   };
 
   return (
-    <div className="space-y-6 bg-white dark:bg-gray-950 rounded-xl p-6 shadow-sm">
-      <div className="flex items-center space-x-4">
+    <div className="space-y-8 bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm rounded-xl p-8 shadow-lg">
+      <div className="flex items-center space-x-6">
         <span className="text-gray-700 dark:text-gray-300 font-medium">Quantity:</span>
-        <div className="flex items-center space-x-2 bg-purple-50 dark:bg-gray-900 p-1 rounded-lg">
+        <div className="flex items-center space-x-2 bg-purple-50/80 dark:bg-gray-900/80 backdrop-blur-sm p-1.5 rounded-lg">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setQuantity(Math.max(minimumOrder, quantity - 1))}
             disabled={quantity <= minimumOrder}
-            className="hover:bg-purple-100 dark:hover:bg-gray-800"
+            className="hover:bg-purple-100 dark:hover:bg-gray-800 transition-colors"
           >
             -
           </Button>
@@ -92,7 +92,7 @@ export const ProductActions = ({
             size="sm"
             onClick={() => setQuantity(Math.min(stockQuantity, quantity + 1))}
             disabled={quantity >= stockQuantity}
-            className="hover:bg-purple-100 dark:hover:bg-gray-800"
+            className="hover:bg-purple-100 dark:hover:bg-gray-800 transition-colors"
           >
             +
           </Button>
@@ -101,7 +101,7 @@ export const ProductActions = ({
 
       <div className="flex space-x-4">
         <Button
-          className="flex-1 shadow-lg shadow-primary/20 hover:shadow-primary/10 transition-shadow"
+          className="flex-1 shadow-lg shadow-primary/20 hover:shadow-primary/10 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
           onClick={() => {
             toast.success("Added to cart successfully!");
           }}
@@ -110,7 +110,7 @@ export const ProductActions = ({
         </Button>
         <Button
           variant="secondary"
-          className="flex-1 shadow-lg shadow-secondary/20 hover:shadow-secondary/10 transition-shadow"
+          className="flex-1 shadow-lg shadow-secondary/20 hover:shadow-secondary/10 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
           onClick={handleBuyNow}
           disabled={stockQuantity < minimumOrder}
         >
@@ -119,9 +119,11 @@ export const ProductActions = ({
       </div>
 
       {stockQuantity < minimumOrder && (
-        <p className="text-destructive text-sm bg-destructive/10 p-3 rounded-lg">
-          This product is currently out of stock
-        </p>
+        <div className="animate-fade-in">
+          <p className="text-destructive text-sm bg-destructive/10 p-4 rounded-lg backdrop-blur-sm">
+            This product is currently out of stock
+          </p>
+        </div>
       )}
     </div>
   );
