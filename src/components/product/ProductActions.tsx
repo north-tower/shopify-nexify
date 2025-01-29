@@ -73,10 +73,10 @@ export const ProductActions = ({
   };
 
   return (
-    <div className="space-y-8 bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm rounded-xl p-8 shadow-lg">
+    <div className="space-y-8 bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm rounded-xl p-8 shadow-lg border border-primary/10 animate-fade-in [animation-delay:200ms]">
       <div className="flex items-center space-x-6">
         <span className="text-gray-700 dark:text-gray-300 font-medium">Quantity:</span>
-        <div className="flex items-center space-x-2 bg-purple-50/80 dark:bg-gray-900/80 backdrop-blur-sm p-1.5 rounded-lg">
+        <div className="flex items-center space-x-2 bg-purple-50/80 dark:bg-gray-900/80 backdrop-blur-sm p-1.5 rounded-lg border border-primary/10 shadow-sm">
           <Button
             variant="ghost"
             size="sm"
@@ -101,7 +101,7 @@ export const ProductActions = ({
 
       <div className="flex space-x-4">
         <Button
-          className="flex-1 shadow-lg shadow-primary/20 hover:shadow-primary/10 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+          className="flex-1 shadow-lg shadow-primary/20 hover:shadow-primary/10 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
           onClick={() => {
             toast.success("Added to cart successfully!");
           }}
@@ -110,7 +110,7 @@ export const ProductActions = ({
         </Button>
         <Button
           variant="secondary"
-          className="flex-1 shadow-lg shadow-secondary/20 hover:shadow-secondary/10 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+          className="flex-1 shadow-lg shadow-secondary/20 hover:shadow-secondary/10 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] bg-gradient-to-r from-secondary/80 to-primary/80 hover:from-secondary/70 hover:to-primary/70 text-white"
           onClick={handleBuyNow}
           disabled={stockQuantity < minimumOrder}
         >
@@ -120,7 +120,7 @@ export const ProductActions = ({
 
       {stockQuantity < minimumOrder && (
         <div className="animate-fade-in">
-          <p className="text-destructive text-sm bg-destructive/10 p-4 rounded-lg backdrop-blur-sm">
+          <p className="text-destructive text-sm bg-destructive/10 p-4 rounded-lg backdrop-blur-sm border border-destructive/20">
             This product is currently out of stock
           </p>
         </div>
