@@ -70,7 +70,7 @@ const ProductCard = ({
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col items-start p-5 gap-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm relative z-20">
+        <CardFooter className="flex flex-col items-start p-5 gap-2 bg-white/95 dark:bg-gray-900/95 relative z-20">
           <h3 className="font-medium text-sm line-clamp-2 text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors duration-300">
             {title}
           </h3>
