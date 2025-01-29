@@ -44,25 +44,25 @@ const ProductCard = ({
 
   return (
     <Link to={`/product/${id}`}>
-      <Card className="overflow-hidden group hover:shadow-xl transition-all duration-500 h-full bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-950/50 border-transparent hover:border-primary/20">
+      <Card className="overflow-hidden group hover:shadow-2xl transition-all duration-500 h-full bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-950/50 border-transparent hover:border-primary/20 relative before:absolute before:inset-0 before:bg-white/10 before:backdrop-blur-sm dark:before:bg-black/10 before:opacity-0 before:transition-opacity before:duration-500 hover:before:opacity-100">
         <CardContent className="p-0 relative">
           {discount && (
-            <Badge className="absolute top-3 right-3 bg-sale hover:bg-sale/90 shadow-lg animate-fade-in">
+            <Badge className="absolute top-3 right-3 bg-sale hover:bg-sale/90 shadow-lg animate-fade-in z-10 backdrop-blur-md">
               -{discount}% OFF
             </Badge>
           )}
-          <div className="relative overflow-hidden">
+          <div className="relative overflow-hidden group">
             <div className="aspect-square">
               <img
                 src={image || "/placeholder.svg"}
                 alt={title}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
+                className="w-full h-full object-cover transform transition-all duration-700 ease-out group-hover:scale-110 group-hover:rotate-1"
               />
             </div>
-            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-sm">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center backdrop-blur-[2px]">
               <Button 
                 onClick={handleAddToCart}
-                className="bg-white text-primary hover:bg-primary hover:text-white transform -translate-y-2 group-hover:translate-y-0 transition-all duration-300 shadow-xl"
+                className="bg-white/90 text-primary hover:bg-primary hover:text-white transform -translate-y-4 group-hover:translate-y-0 transition-all duration-500 shadow-xl hover:shadow-primary/25 opacity-0 group-hover:opacity-100"
               >
                 <ShoppingCart className="mr-2 h-4 w-4" />
                 Add to Cart
@@ -82,7 +82,7 @@ const ProductCard = ({
             <span className="text-gray-500">({reviews_count} reviews)</span>
           </div>
           <div className="flex items-center space-x-3 mt-1">
-            <span className="text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <span className="text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-gradient-to-r after:from-primary/20 after:to-secondary/20">
               KSh {price.toLocaleString()}
             </span>
             {originalPrice && (
