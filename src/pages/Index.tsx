@@ -7,6 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 
 const Index = () => {
   const { data: products, isLoading, error } = useQuery({
@@ -19,33 +23,55 @@ const Index = () => {
     },
   });
   
+  const isMobile = useIsMobile();
   console.log("Products:", products);
   console.error("Error:", error);
-  
 
-
-  console.log(products)
+  const CategorySidebarContent = () => (
+    <div className="h-full">
+      <CategorySidebar />
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-12 gap-6">
-          {/* Sidebar */}
-          <div className="col-span-3">
-            <CategorySidebar />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Sidebar - Desktop */}
+          <div className="hidden lg:block lg:col-span-3">
+            <CategorySidebarContent />
+          </div>
+          
+          {/* Sidebar - Mobile */}
+          <div className="lg:hidden mb-4">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="w-full">
+                  <Menu className="h-4 w-4 mr-2" />
+                  Browse Categories
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                <div className="py-4">
+                  <CategorySidebarContent />
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
           
           {/* Main Content */}
-          <div className="col-span-9">
-            <FlashSales />
+          <div className="lg:col-span-9">
+            <div className="mb-8">
+              <FlashSales />
+            </div>
             
             {/* Products Grid */}
-            <div className="mt-8">
+            <div>
               <h2 className="text-xl font-bold mb-6">Featured Products</h2>
               
               {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   {[...Array(4)].map((_, i) => (
                     <div key={i} className="space-y-4">
                       <Skeleton className="h-48 w-full" />
@@ -62,7 +88,7 @@ const Index = () => {
                   </AlertDescription>
                 </Alert>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   {products?.map((product) => (
                     <ProductCard
                       key={product.id}
