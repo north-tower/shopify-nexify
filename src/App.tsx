@@ -14,6 +14,7 @@ import Deals from "./pages/Deals";
 import Account from "./pages/Account";
 import Auth from "./pages/Auth";
 import SellerRegistration from "./pages/SellerRegistration";
+import SellerDashboard from "./pages/SellerDashboard";
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient({
@@ -59,9 +60,9 @@ const App = () => {
               }
             />
             <Route 
-              path="/seller/dashboard/*" 
+              path="/seller/dashboard" 
               element={
-                session ? <Navigate to="/seller/dashboard" replace /> : <Navigate to="/auth?seller=true" replace />
+                session ? <SellerDashboard /> : <Navigate to="/auth?seller=true" replace />
               } 
             />
             <Route 
