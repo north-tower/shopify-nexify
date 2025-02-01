@@ -71,7 +71,7 @@ const Index = () => {
               <h2 className="text-xl font-bold mb-6">Featured Products</h2>
               
               {isLoading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
                   {[...Array(4)].map((_, i) => (
                     <div key={i} className="space-y-4">
                       <Skeleton className="h-48 w-full" />
@@ -88,7 +88,7 @@ const Index = () => {
                   </AlertDescription>
                 </Alert>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
                   {products?.map((product) => (
                     <ProductCard
                       key={product.id}
