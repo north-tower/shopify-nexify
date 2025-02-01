@@ -1,4 +1,4 @@
-import { Search, ShoppingCart, User, Menu, LogOut } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, LogOut, Store } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useState, useEffect } from "react";
@@ -57,6 +57,12 @@ const Navbar = () => {
             </Link>
             <Link to="/deals" className="hidden md:block text-sm font-medium hover:text-primary transition-colors">
               Deals
+            </Link>
+            <Link to="/seller/register" className="hidden md:block text-sm font-medium hover:text-primary transition-colors">
+              <span className="flex items-center">
+                <Store className="h-4 w-4 mr-1" />
+                Become a Seller
+              </span>
             </Link>
           </div>
 
@@ -186,6 +192,12 @@ const Navbar = () => {
                       {cartCount}
                     </span>
                   )}
+                </Button>
+              </Link>
+              <Link to="/seller/register">
+                <Button variant="ghost" className="w-full justify-start">
+                  <Store className="h-5 w-5 mr-2" />
+                  Become a Seller
                 </Button>
               </Link>
             </div>

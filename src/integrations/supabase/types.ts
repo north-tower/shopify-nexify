@@ -433,6 +433,7 @@ export type Database = {
           product_name: string
           ratings: number | null
           reviews_count: number | null
+          seller_id: string | null
           sku: string
           specifications: Json | null
           status: string | null
@@ -452,6 +453,7 @@ export type Database = {
           product_name: string
           ratings?: number | null
           reviews_count?: number | null
+          seller_id?: string | null
           sku: string
           specifications?: Json | null
           status?: string | null
@@ -471,13 +473,22 @@ export type Database = {
           product_name?: string
           ratings?: number | null
           reviews_count?: number | null
+          seller_id?: string | null
           sku?: string
           specifications?: Json | null
           status?: string | null
           stock_quantity?: number | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -578,6 +589,106 @@ export type Database = {
           id?: number
           referalcode2?: string | null
           userid?: string
+        }
+        Relationships: []
+      }
+      sales: {
+        Row: {
+          commission_amount: number | null
+          commission_rate: number | null
+          created_at: string | null
+          id: number
+          order_id: number
+          product_id: number
+          quantity: number
+          sale_amount: number
+          seller_id: string
+        }
+        Insert: {
+          commission_amount?: number | null
+          commission_rate?: number | null
+          created_at?: string | null
+          id?: never
+          order_id: number
+          product_id: number
+          quantity: number
+          sale_amount: number
+          seller_id: string
+        }
+        Update: {
+          commission_amount?: number | null
+          commission_rate?: number | null
+          created_at?: string | null
+          id?: never
+          order_id?: number
+          product_id?: number
+          quantity?: number
+          sale_amount?: number
+          seller_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sellers: {
+        Row: {
+          address: Json | null
+          business_name: string
+          contact_email: string
+          contact_phone: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          logo_url: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          address?: Json | null
+          business_name: string
+          contact_email: string
+          contact_phone?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          address?: Json | null
+          business_name?: string
+          contact_email?: string
+          contact_phone?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }

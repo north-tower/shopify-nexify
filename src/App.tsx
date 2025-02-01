@@ -13,6 +13,7 @@ import Checkout from "./pages/Checkout";
 import Deals from "./pages/Deals";
 import Account from "./pages/Account";
 import Auth from "./pages/Auth";
+import SellerRegistration from "./pages/SellerRegistration";
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient({
@@ -51,6 +52,7 @@ const App = () => {
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/deals" element={<Deals />} />
+            <Route path="/seller/register" element={<SellerRegistration />} />
             <Route 
               path="/account" 
               element={
