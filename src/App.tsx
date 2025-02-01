@@ -52,15 +52,16 @@ const App = () => {
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/deals" element={<Deals />} />
-            <Route path="/seller/register" element={<SellerRegistration />} />
+            <Route 
+              path="/seller/register" 
+              element={
+                session ? <SellerRegistration /> : <Navigate to="/auth?seller=true" replace />
+              }
+            />
             <Route 
               path="/seller/dashboard/*" 
               element={
-                session ? (
-                  <Navigate to="/auth?seller=true" replace />
-                ) : (
-                  <Navigate to="/auth?seller=true" replace />
-                )
+                session ? <Navigate to="/seller/dashboard" replace /> : <Navigate to="/auth?seller=true" replace />
               } 
             />
             <Route 
