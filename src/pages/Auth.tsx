@@ -1,29 +1,46 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Lock, Mail, User } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
+  const isSeller = location.search.includes('seller=true');
 
   useEffect(() => {
     // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
-        navigate("/");
+        if (isSeller) {
+          // Check if user is a seller
+          const { data: seller } = await supabase
+            .from('sellers')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .single();
+
+          if (seller) {
+            navigate("/seller/dashboard");
+          } else {
+            navigate("/seller/register");
+          }
+        } else {
+          navigate("/");
+        }
       }
     });
-  }, [navigate]);
+  }, [navigate, isSeller]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +65,7 @@ const Auth = () => {
               description: "Please sign in instead or use a different email.",
               variant: "destructive",
             });
-            setIsSignUp(false); // Switch to sign in mode
+            setIsSignUp(false);
           } else {
             toast({
               title: "Sign up failed",
@@ -63,7 +80,7 @@ const Auth = () => {
           });
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { error, data } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -83,7 +100,22 @@ const Auth = () => {
             });
           }
         } else {
-          navigate("/");
+          // Check if user is a seller when logging in
+          if (isSeller) {
+            const { data: seller } = await supabase
+              .from('sellers')
+              .select('*')
+              .eq('user_id', data.session?.user.id)
+              .single();
+
+            if (seller) {
+              navigate("/seller/dashboard");
+            } else {
+              navigate("/seller/register");
+            }
+          } else {
+            navigate("/");
+          }
         }
       }
     } catch (error: any) {
@@ -103,6 +135,7 @@ const Auth = () => {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
             {isSignUp ? "Create an account" : "Sign in to your account"}
+            {isSeller && " as Seller"}
           </CardTitle>
           <CardDescription className="text-center">
             {isSignUp

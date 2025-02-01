@@ -19,7 +19,7 @@ const App = () => {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 60 * 1000, // 1 minute
+        staleTime: 60 * 1000,
         retry: 1,
       },
     },
@@ -53,6 +53,16 @@ const App = () => {
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/deals" element={<Deals />} />
             <Route path="/seller/register" element={<SellerRegistration />} />
+            <Route 
+              path="/seller/dashboard/*" 
+              element={
+                session ? (
+                  <Navigate to="/auth?seller=true" replace />
+                ) : (
+                  <Navigate to="/auth?seller=true" replace />
+                )
+              } 
+            />
             <Route 
               path="/account" 
               element={
