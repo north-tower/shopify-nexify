@@ -16,6 +16,8 @@ import Account from "./pages/Account";
 import Auth from "./pages/Auth";
 import SellerRegistration from "./pages/SellerRegistration";
 import SellerDashboard from "./pages/SellerDashboard";
+import SellerProducts from "./pages/SellerProducts";
+import SellerAddProduct from "./pages/SellerAddProduct";
 
 // Route guard for seller routes
 const SellerRoute = ({ element }) => {
@@ -118,7 +120,8 @@ const App = () => {
               }
             />
             <Route path="/seller/dashboard" element={<SellerRoute element={<SellerDashboard />} />} />
-            <Route path="/seller/products" element={<SellerRoute element={<div>Products Management</div>} />} />
+            <Route path="/seller/products" element={<SellerRoute element={<SellerProducts />} />} />
+            <Route path="/seller/add-product" element={<SellerRoute element={<SellerAddProduct />} />} />
             <Route path="/seller/orders" element={<SellerRoute element={<div>Orders Management</div>} />} />
             <Route path="/seller/analytics" element={<SellerRoute element={<div>Analytics</div>} />} />
             <Route path="/seller/settings" element={<SellerRoute element={<div>Settings</div>} />} />
