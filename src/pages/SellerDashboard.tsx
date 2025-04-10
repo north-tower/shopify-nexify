@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,14 +8,14 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { Package, DollarSign, ShoppingCart, TrendingUp, Users, LayoutDashboard, Settings, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
-import { Link } from "react-router-dom";
-import Navbar from "@/components/Navbar";
+import { Link, useNavigate } from "react-router-dom";
+import SellerLayout from "@/components/seller/SellerLayout";
 
 const SellerDashboard = () => {
+  const navigate = useNavigate();
   const [sellerId, setSellerId] = useState<string | null>(null);
   const [sellerName, setSellerName] = useState("");
 
-  // Fetch seller info for the current user
   useEffect(() => {
     const fetchSellerInfo = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -35,7 +34,6 @@ const SellerDashboard = () => {
     fetchSellerInfo();
   }, []);
 
-  // Fetch sales data
   const { data: salesData } = useQuery({
     queryKey: ['sales', sellerId],
     queryFn: async () => {
@@ -57,7 +55,6 @@ const SellerDashboard = () => {
     enabled: !!sellerId
   });
 
-  // Fetch products count
   const { data: productsCount } = useQuery({
     queryKey: ['products-count', sellerId],
     queryFn: async () => {
@@ -71,21 +68,21 @@ const SellerDashboard = () => {
     enabled: !!sellerId
   });
 
-  // Calculate metrics
   const totalSales = salesData?.reduce((sum, sale) => sum + Number(sale.sale_amount), 0) || 0;
   const totalOrders = salesData?.length || 0;
   const averageOrderValue = totalOrders > 0 ? totalSales / totalOrders : 0;
 
-  // Format sales data for chart
   const chartData = salesData?.slice(0, 7).map(sale => ({
     name: new Date(sale.created_at).toLocaleDateString(),
     amount: Number(sale.sale_amount)
   })).reverse() || [];
 
+  const handleAddProductClick = () => {
+    navigate('/seller/add-product');
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
+    <SellerLayout>
       <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center">
           <div>
@@ -94,60 +91,16 @@ const SellerDashboard = () => {
           </div>
           
           <div className="mt-4 md:mt-0 flex gap-2">
-            <Button className="flex items-center gap-2">
+            <Button 
+              className="flex items-center gap-2"
+              onClick={handleAddProductClick}
+            >
               <PlusCircle className="h-4 w-4" />
               Add Product
             </Button>
           </div>
         </div>
         
-        {/* Seller Navigation */}
-        <NavigationMenu className="mb-6">
-          <NavigationMenuList className="border rounded-lg bg-white shadow-sm">
-            <NavigationMenuItem>
-              <Link to="/seller/dashboard">
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  <LayoutDashboard className="h-4 w-4 mr-2" />
-                  Dashboard
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link to="/seller/products">
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  <Package className="h-4 w-4 mr-2" />
-                  Products
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link to="/seller/orders">
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Orders
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link to="/seller/analytics">
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  <TrendingUp className="h-4 w-4 mr-2" />
-                  Analytics
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link to="/seller/settings">
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  <Settings className="h-4 w-4 mr-2" />
-                  Settings
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
-      
-        {/* Metrics Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -198,7 +151,6 @@ const SellerDashboard = () => {
           </TabsList>
           
           <TabsContent value="overview">
-            {/* Sales Chart */}
             <Card className="col-span-4">
               <CardHeader>
                 <CardTitle>Sales Overview</CardTitle>
@@ -270,7 +222,7 @@ const SellerDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </SellerLayout>
   );
 };
 
