@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,6 +49,8 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
+        // Handle sign up
+        console.log("Signing up with:", email, password);
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -59,6 +62,7 @@ const Auth = () => {
         });
         
         if (error) {
+          console.error("Sign up error:", error);
           if (error.message.includes("User already registered")) {
             toast({
               title: "Account already exists",
@@ -78,14 +82,19 @@ const Auth = () => {
             title: "Success!",
             description: "Please check your email to verify your account.",
           });
+          // For faster testing, you might want to auto-sign in the user here
+          // or redirect them to the sign-in page
         }
       } else {
+        // Handle sign in
+        console.log("Signing in with:", email, password);
         const { error, data } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         
         if (error) {
+          console.error("Sign in error:", error);
           if (error.message.includes("Invalid login credentials")) {
             toast({
               title: "Invalid credentials",
@@ -100,6 +109,7 @@ const Auth = () => {
             });
           }
         } else {
+          console.log("Sign in successful:", data);
           // Check if user is a seller when logging in
           if (isSeller) {
             const { data: seller } = await supabase
@@ -119,6 +129,7 @@ const Auth = () => {
         }
       }
     } catch (error: any) {
+      console.error("Authentication error:", error);
       toast({
         title: "Error",
         description: error.message,
