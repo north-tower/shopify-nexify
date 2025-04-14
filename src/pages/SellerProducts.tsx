@@ -1,9 +1,9 @@
 
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Package, Plus, Edit, Trash2, Search } from "lucide-react";
+import { Package, Plus, Edit, Trash2, Search, ExternalLink, ArrowUpDown, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,6 +15,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import SellerLayout from "@/components/seller/SellerLayout";
+import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface Product {
   id: number;
@@ -30,8 +40,14 @@ interface Product {
 
 const SellerProducts = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const highlightedProductId = searchParams.get('highlight');
+  
   const [sellerId, setSellerId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [sortBy, setSortBy] = useState<string>("newest");
 
   // Fetch seller ID
   useEffect(() => {
@@ -52,7 +68,7 @@ const SellerProducts = () => {
   }, []);
 
   // Fetch products data
-  const { data: products, isLoading, error } = useQuery({
+  const { data: products, isLoading, error, refetch } = useQuery({
     queryKey: ['seller-products', sellerId],
     queryFn: async () => {
       if (!sellerId) return [];
@@ -71,13 +87,84 @@ const SellerProducts = () => {
     enabled: !!sellerId
   });
 
-  // Filtered products based on search
-  const filteredProducts = products?.filter(product => 
-    product.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Get unique categories for filter
+  const categories = [...new Set(products?.map(product => product.category).filter(Boolean))];
+  
+  // Handle product deletion
+  const handleDeleteProduct = async (productId: number) => {
+    if (confirm("Are you sure you want to delete this product?")) {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productId)
+        .eq('seller_id', sellerId);
+      
+      if (error) {
+        toast.error("Failed to delete product");
+        console.error("Error deleting product:", error);
+      } else {
+        toast.success("Product deleted successfully");
+        refetch();
+      }
+    }
+  };
 
+  // Handle product edit
+  const handleEditProduct = (productId: number) => {
+    navigate(`/seller/edit-product/${productId}`);
+  };
+
+  // Filter and sort products
+  const filteredProducts = products?.filter(product => {
+    const matchesSearch = 
+      product.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (product.category && product.category.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesCategory = categoryFilter ? product.category === categoryFilter : true;
+    const matchesStatus = statusFilter ? product.status === statusFilter : true;
+    
+    return matchesSearch && matchesCategory && matchesStatus;
+  }).sort((a, b) => {
+    switch (sortBy) {
+      case 'name-asc':
+        return a.product_name.localeCompare(b.product_name);
+      case 'name-desc':
+        return b.product_name.localeCompare(a.product_name);
+      case 'price-asc':
+        return a.price - b.price;
+      case 'price-desc':
+        return b.price - a.price;
+      case 'stock-asc':
+        return a.stock_quantity - b.stock_quantity;
+      case 'stock-desc':
+        return b.stock_quantity - a.stock_quantity;
+      case 'newest':
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      case 'oldest':
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      default:
+        return 0;
+    }
+  });
+
+  // Scroll to highlighted product
+  useEffect(() => {
+    if (highlightedProductId && !isLoading && products) {
+      const element = document.getElementById(`product-${highlightedProductId}`);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.classList.add('bg-yellow-50');
+          setTimeout(() => {
+            element.classList.remove('bg-yellow-50');
+            element.classList.add('bg-white');
+          }, 2000);
+        }, 500);
+      }
+    }
+  }, [highlightedProductId, isLoading, products]);
+  
   return (
     <SellerLayout>
       <div className="space-y-6">
@@ -96,8 +183,8 @@ const SellerProducts = () => {
         </div>
         
         {/* Search and filters */}
-        <div className="flex items-center">
-          <div className="relative w-full max-w-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="relative">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search products..."
@@ -106,19 +193,67 @@ const SellerProducts = () => {
               className="pl-10"
             />
           </div>
+          
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Categories</SelectItem>
+              {categories.map(category => (
+                <SelectItem key={category} value={category}>{category}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Statuses</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="archived">Archived</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger>
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest First</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+              <SelectItem value="name-asc">Name (A-Z)</SelectItem>
+              <SelectItem value="name-desc">Name (Z-A)</SelectItem>
+              <SelectItem value="price-asc">Price (Low to High)</SelectItem>
+              <SelectItem value="price-desc">Price (High to Low)</SelectItem>
+              <SelectItem value="stock-asc">Stock (Low to High)</SelectItem>
+              <SelectItem value="stock-desc">Stock (High to Low)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         
         {/* Products table */}
-        <div className="border rounded-md">
+        <div className="border rounded-md overflow-hidden shadow-sm">
           <Table>
             <TableHeader>
-              <TableRow>
+              <TableRow className="bg-muted/50">
                 <TableHead className="w-[80px]">Image</TableHead>
-                <TableHead>Product</TableHead>
+                <TableHead>
+                  <div className="flex items-center">
+                    Product <ArrowUpDown className="ml-2 h-3 w-3 text-muted-foreground" />
+                  </div>
+                </TableHead>
                 <TableHead>SKU</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Price</TableHead>
-                <TableHead>Stock</TableHead>
+                <TableHead>
+                  <div className="flex items-center">
+                    Stock <ArrowUpDown className="ml-2 h-3 w-3 text-muted-foreground" />
+                  </div>
+                </TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -132,22 +267,37 @@ const SellerProducts = () => {
                 </TableRow>
               ) : error ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-red-500">
-                    Error loading products
+                  <TableCell colSpan={8} className="text-center py-8">
+                    <div className="flex flex-col items-center text-red-500">
+                      <AlertCircle className="h-6 w-6 mb-2" />
+                      <p>Error loading products</p>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => refetch()}
+                        className="mt-2"
+                      >
+                        Retry
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : filteredProducts?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-8">
-                    {searchTerm ? (
-                      <div>
-                        <p>No products matching "{searchTerm}"</p>
+                    {searchTerm || categoryFilter || statusFilter ? (
+                      <div className="flex flex-col items-center">
+                        <p>No products matching your filters</p>
                         <Button 
                           variant="link" 
-                          onClick={() => setSearchTerm("")}
+                          onClick={() => {
+                            setSearchTerm("");
+                            setCategoryFilter("");
+                            setStatusFilter("");
+                          }}
                           className="mt-2"
                         >
-                          Clear search
+                          Clear all filters
                         </Button>
                       </div>
                     ) : (
@@ -163,9 +313,16 @@ const SellerProducts = () => {
                 </TableRow>
               ) : (
                 filteredProducts?.map((product) => (
-                  <TableRow key={product.id}>
+                  <TableRow 
+                    key={product.id} 
+                    id={`product-${product.id}`}
+                    className={cn(
+                      "transition-all",
+                      Number(highlightedProductId) === product.id && "bg-yellow-50"
+                    )}
+                  >
                     <TableCell>
-                      <div className="h-10 w-10 rounded overflow-hidden bg-gray-100 flex items-center justify-center">
+                      <div className="h-12 w-12 rounded overflow-hidden bg-gray-100 flex items-center justify-center">
                         {product.photo_url ? (
                           <img 
                             src={product.photo_url} 
@@ -179,28 +336,43 @@ const SellerProducts = () => {
                     </TableCell>
                     <TableCell className="font-medium">{product.product_name}</TableCell>
                     <TableCell>{product.sku}</TableCell>
-                    <TableCell>{product.category || "—"}</TableCell>
-                    <TableCell>${product.price.toFixed(2)}</TableCell>
-                    <TableCell>{product.stock_quantity}</TableCell>
                     <TableCell>
-                      <span 
-                        className={`px-2 py-1 text-xs rounded-full ${
-                          product.status === "active" 
-                            ? "bg-green-100 text-green-800" 
-                            : product.status === "draft"
-                            ? "bg-amber-100 text-amber-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {product.status}
+                      {product.category ? (
+                        <Badge variant="outline">{product.category}</Badge>
+                      ) : "—"}
+                    </TableCell>
+                    <TableCell className="font-medium">${product.price.toFixed(2)}</TableCell>
+                    <TableCell>
+                      <span className={cn(
+                        "font-medium",
+                        product.stock_quantity <= 5 ? "text-red-500" : 
+                        product.stock_quantity <= 20 ? "text-amber-500" : 
+                        "text-green-600"
+                      )}>
+                        {product.stock_quantity}
                       </span>
                     </TableCell>
+                    <TableCell>
+                      <Badge 
+                        className={cn(
+                          product.status === "active" ? "bg-green-100 text-green-800 hover:bg-green-200" : 
+                          product.status === "draft" ? "bg-amber-100 text-amber-800 hover:bg-amber-200" :
+                          "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                        )}
+                        variant="secondary"
+                      >
+                        {product.status}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end space-x-2">
-                        <Button variant="ghost" size="icon">
+                      <div className="flex justify-end space-x-1">
+                        <Button variant="ghost" size="icon" title="View Product" onClick={() => window.open(`/product/${product.id}`, '_blank')}>
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" title="Edit Product" onClick={() => handleEditProduct(product.id)}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" title="Delete Product" onClick={() => handleDeleteProduct(product.id)}>
                           <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>
                       </div>
