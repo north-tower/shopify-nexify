@@ -43,6 +43,15 @@ interface OrderItem {
   total_price: number;
 }
 
+// Define the shape of shipping address
+interface ShippingAddress {
+  firstName: string;
+  lastName: string;
+  address: string;
+  city: string;
+  country: string;
+}
+
 interface Order {
   id: number;
   order_number: string;
@@ -50,13 +59,7 @@ interface Order {
   order_status: string;
   payment_status: string;
   total_amount: number;
-  shipping_address: {
-    firstName: string;
-    lastName: string;
-    address: string;
-    city: string;
-    country: string;
-  };
+  shipping_address: ShippingAddress;
   items: OrderItem[];
 }
 
@@ -132,7 +135,9 @@ const SellerOrders = () => {
           
         return {
           ...order,
-          items: orderItems
+          items: orderItems,
+          // Convert shipping_address from Json to ShippingAddress type
+          shipping_address: order.shipping_address as unknown as ShippingAddress
         };
       });
 
