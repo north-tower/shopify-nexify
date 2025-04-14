@@ -18,6 +18,7 @@ import SellerRegistration from "./pages/SellerRegistration";
 import SellerDashboard from "./pages/SellerDashboard";
 import SellerProducts from "./pages/SellerProducts";
 import SellerAddProduct from "./pages/SellerAddProduct";
+import SellerOrders from "./pages/SellerOrders";
 
 // Route guard for seller routes
 const SellerRoute = ({ element }) => {
@@ -122,7 +123,7 @@ const App = () => {
             <Route path="/seller/dashboard" element={<SellerRoute element={<SellerDashboard />} />} />
             <Route path="/seller/products" element={<SellerRoute element={<SellerProducts />} />} />
             <Route path="/seller/add-product" element={<SellerRoute element={<SellerAddProduct />} />} />
-            <Route path="/seller/orders" element={<SellerRoute element={<div>Orders Management</div>} />} />
+            <Route path="/seller/orders" element={<SellerRoute element={<SellerOrders />} />} />
             <Route path="/seller/analytics" element={<SellerRoute element={<div>Analytics</div>} />} />
             <Route path="/seller/settings" element={<SellerRoute element={<div>Settings</div>} />} />
             <Route 
