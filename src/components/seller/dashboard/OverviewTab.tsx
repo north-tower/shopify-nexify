@@ -1,7 +1,7 @@
 
-import { SalesChart } from "./SalesChart";
-import { CategoryPieChart } from "./CategoryPieChart";
-import { QuickActions } from "./QuickActions";
+import SalesChart from "./SalesChart";
+import CategoryPieChart from "./CategoryPieChart";
+import QuickActions from "./QuickActions";
 
 interface OverviewTabProps {
   chartData: Array<{ name: string; amount: number }>;
