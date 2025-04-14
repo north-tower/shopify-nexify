@@ -20,6 +20,8 @@ const SellerDashboard = () => {
     productsCount,
     topProducts,
     isLoadingTopProducts,
+    monthlySalesData,
+    isLoadingMonthlySales,
     totalSales,
     totalOrders,
     averageOrderValue,
@@ -71,6 +73,8 @@ const SellerDashboard = () => {
             <OverviewTab 
               chartData={chartData}
               categoryData={categoryData}
+              monthlySalesData={monthlySalesData}
+              isLoadingMonthlySales={isLoadingMonthlySales}
               onAddProduct={handleAddProductClick}
               onManageOrders={handleManageOrders}
               onSettings={handleSettings}

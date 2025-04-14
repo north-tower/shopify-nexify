@@ -86,6 +86,57 @@ export const useSalesData = (sellerId: string | null) => {
     enabled: !!sellerId
   });
 
+  // Get monthly sales data for analytics
+  const { data: monthlySalesData, isLoading: isLoadingMonthlySales } = useQuery({
+    queryKey: ['monthly-sales', sellerId],
+    queryFn: async () => {
+      if (!sellerId) return null;
+      
+      // Get data from the last 6 months
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      
+      const { data } = await supabase
+        .from('sales')
+        .select(`
+          sale_amount,
+          created_at
+        `)
+        .eq('seller_id', sellerId)
+        .gte('created_at', sixMonthsAgo.toISOString())
+        .order('created_at', { ascending: true });
+      
+      // Aggregate sales by month
+      const monthlySales = new Map();
+      data?.forEach(sale => {
+        const date = new Date(sale.created_at);
+        const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
+        
+        if (monthlySales.has(monthYear)) {
+          monthlySales.set(monthYear, {
+            ...monthlySales.get(monthYear),
+            amount: monthlySales.get(monthYear).amount + Number(sale.sale_amount)
+          });
+        } else {
+          const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+          monthlySales.set(monthYear, {
+            name: `${monthNames[date.getMonth()]} ${date.getFullYear()}`,
+            amount: Number(sale.sale_amount),
+            month: date.getMonth(),
+            year: date.getFullYear()
+          });
+        }
+      });
+      
+      // Convert to array and sort by date
+      return Array.from(monthlySales.values()).sort((a, b) => {
+        if (a.year !== b.year) return a.year - b.year;
+        return a.month - b.month;
+      });
+    },
+    enabled: !!sellerId
+  });
+
   // Calculate derived data
   const totalSales = salesData?.reduce((sum, sale) => sum + Number(sale.sale_amount), 0) || 0;
   const totalOrders = salesData?.length || 0;
@@ -114,6 +165,8 @@ export const useSalesData = (sellerId: string | null) => {
     productsCount,
     topProducts,
     isLoadingTopProducts,
+    monthlySalesData,
+    isLoadingMonthlySales,
     totalSales,
     totalOrders,
     averageOrderValue,

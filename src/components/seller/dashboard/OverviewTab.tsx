@@ -2,6 +2,7 @@
 import SalesChart from "./SalesChart";
 import CategoryPieChart from "./CategoryPieChart";
 import QuickActions from "./QuickActions";
+import AnalyticsOverview from "./AnalyticsOverview";
 import EmptyState from "./EmptyState";
 import { PackagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,8 @@ import { Button } from "@/components/ui/button";
 interface OverviewTabProps {
   chartData: Array<{ name: string; amount: number }>;
   categoryData: Array<{ name: string; value: number }>;
+  monthlySalesData: Array<{ name: string; amount: number }>;
+  isLoadingMonthlySales: boolean;
   onAddProduct: () => void;
   onManageOrders: () => void;
   onSettings: () => void;
@@ -17,6 +20,8 @@ interface OverviewTabProps {
 const OverviewTab = ({
   chartData,
   categoryData,
+  monthlySalesData,
+  isLoadingMonthlySales,
   onAddProduct,
   onManageOrders,
   onSettings,
@@ -39,10 +44,19 @@ const OverviewTab = ({
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
+      {/* Analytics overview chart */}
+      <AnalyticsOverview 
+        monthlySalesData={monthlySalesData} 
+        isLoadingMonthlySales={isLoadingMonthlySales} 
+      />
+      
+      {/* Recent sales chart */}
       <SalesChart chartData={chartData} />
       
+      {/* Category distribution */}
       <CategoryPieChart categoryData={categoryData} />
       
+      {/* Quick actions */}
       <QuickActions 
         onAddProduct={onAddProduct} 
         onManageOrders={onManageOrders} 
