@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EmptyState from "./EmptyState";
+import { useNavigate } from "react-router-dom";
 
 interface TopProduct {
   id: string;
@@ -20,10 +21,23 @@ interface TopProductsTabProps {
 }
 
 const TopProductsTab = ({ isLoading, topProducts, onAddProduct }: TopProductsTabProps) => {
+  const navigate = useNavigate();
+
+  const handleViewProduct = (productId: string) => {
+    navigate(`/seller/products?highlight=${productId}`);
+  };
+
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Top Products</CardTitle>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => navigate('/seller/products')}
+        >
+          View All Products
+        </Button>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -33,7 +47,11 @@ const TopProductsTab = ({ isLoading, topProducts, onAddProduct }: TopProductsTab
         ) : topProducts && topProducts.length > 0 ? (
           <div className="grid gap-6">
             {topProducts.map((product) => (
-              <div key={product.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+              <div 
+                key={product.id} 
+                className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0 hover:bg-gray-50 p-2 rounded-md cursor-pointer transition-colors"
+                onClick={() => handleViewProduct(product.id)}
+              >
                 <div className="flex items-center gap-4">
                   <div className="h-16 w-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                     {product.image ? (
