@@ -136,7 +136,7 @@ const SellerOrders = () => {
         return {
           ...order,
           items: orderItems,
-          // Convert shipping_address from Json to ShippingAddress type
+          // Properly cast shipping_address from Json to ShippingAddress type
           shipping_address: order.shipping_address as unknown as ShippingAddress
         };
       });
