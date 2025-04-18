@@ -15,11 +15,18 @@ export const NavbarLinks = ({ isSellerRoute, isSeller }: NavbarLinksProps) => {
       <Link to="/deals" className="hidden md:block text-sm font-medium hover:text-primary transition-colors">
         Deals
       </Link>
-      {!isSeller && (
+      {!isSeller ? (
         <Link to="/seller/register" className="hidden md:block text-sm font-medium hover:text-primary transition-colors">
           <span className="flex items-center">
             <Store className="h-4 w-4 mr-1" />
             Become a Seller
+          </span>
+        </Link>
+      ) : (
+        <Link to="/seller/dashboard" className="hidden md:block text-sm font-medium hover:text-primary transition-colors">
+          <span className="flex items-center">
+            <LayoutDashboard className="h-4 w-4 mr-1" />
+            Seller Dashboard
           </span>
         </Link>
       )}
