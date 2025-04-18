@@ -305,12 +305,12 @@ const SellerAnalytics = () => {
                               {index + 1}
                             </div>
                             <div>
-                              <p className="font-medium">{sale.product_name}</p>
-                              <p className="text-sm text-muted-foreground">SKU: {sale.sku}</p>
+                              <p className="font-medium">{sale.products?.product_name || 'Unknown Product'}</p>
+                              <p className="text-sm text-muted-foreground">SKU: {sale.products?.id || 'N/A'}</p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="font-medium">KSh {sale.total_price?.toLocaleString()}</p>
+                            <p className="font-medium">KSh {sale.sale_amount?.toLocaleString()}</p>
                             <p className="text-sm text-muted-foreground">Qty: {sale.quantity}</p>
                           </div>
                         </div>
