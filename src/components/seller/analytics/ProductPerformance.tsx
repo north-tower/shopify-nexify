@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -67,4 +68,4 @@ const ProductPerformance = ({ data, isLoading }: ProductPerformanceProps) => {
   );
 };
 
-export default ProductPerformance; 
+export default ProductPerformance;

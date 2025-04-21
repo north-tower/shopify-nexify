@@ -48,7 +48,6 @@ const ProductDetail = () => {
     },
   });
 
-  // Related products data (could be implemented with actual data later)
   const relatedProducts = [
     { id: 1, name: "Similar Product 1", price: 99.99, imageUrl: "/api/placeholder/300/300" },
     { id: 2, name: "Similar Product 2", price: 129.99, imageUrl: "/api/placeholder/300/300" },
@@ -60,11 +59,10 @@ const ProductDetail = () => {
   };
 
   const shareProduct = (platform) => {
-    // This would be implemented with actual sharing functionality
     toast({
       title: "Shared!",
       description: `Product shared via ${platform}`,
-      variant: "success",
+      variant: "default",
     });
     setShowShareOptions(false);
   };
@@ -265,7 +263,7 @@ const ProductDetail = () => {
                 </div>
                 <div className="text-right">
                   <div className="text-3xl font-bold text-primary">${product.price.toFixed(2)}</div>
-                  {product.old_price && (
+                  {product.old_price !== undefined && product.old_price !== null && (
                     <div className="text-sm text-gray-500 line-through">${product.old_price.toFixed(2)}</div>
                   )}
                 </div>

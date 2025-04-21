@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,6 @@ const FlashSales = () => {
   const [timeLeft, setTimeLeft] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
 
-  // Mock data - replace with actual data from your API
   const flashSales: FlashSaleProduct[] = [
     {
       id: "1",
@@ -93,7 +93,6 @@ const FlashSales = () => {
       const diff = endTime.getTime() - now.getTime();
 
       if (diff <= 0) {
-        // Handle sale end - you might want to refresh the data here
         return;
       }
 
@@ -193,4 +192,4 @@ const FlashSales = () => {
   );
 };
 
-export default FlashSales; 
+export default FlashSales;

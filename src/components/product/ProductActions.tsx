@@ -28,7 +28,6 @@ export const ProductActions = ({
 
   const handleBuyNow = async () => {
     try {
-      // Get current user from supabase auth
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
@@ -36,7 +35,6 @@ export const ProductActions = ({
         return;
       }
 
-      // Query numeric user ID from tbl_user where email = user.email
       const { data: userData, error: userError } = await supabase
         .from("tbl_user")
         .select("userid")
@@ -51,22 +49,20 @@ export const ProductActions = ({
 
       const numericUserId = userData.userid;
 
-      // Create order with numeric user_id
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
-          user_id: numericUserId, // numeric user id from users table
+          user_id: numericUserId, // numeric user id (number)
           order_number: `ORD-${Date.now()}`,
           total_amount: price * quantity,
-          shipping_address: {},
-          billing_address: {},
+          shipping_address: JSON.stringify({}),
+          billing_address: JSON.stringify({}),
         })
         .select()
         .single();
 
       if (orderError) throw orderError;
 
-      // Create order item
       const { error: itemError } = await supabase
         .from('order_items')
         .insert({
@@ -83,6 +79,7 @@ export const ProductActions = ({
 
       toast.success("Order created successfully!");
       navigate('/checkout');
+
     } catch (error) {
       console.error('Error creating order:', error);
       toast.error("Failed to create order. Please try again.");
@@ -145,4 +142,3 @@ export const ProductActions = ({
     </div>
   );
 };
-

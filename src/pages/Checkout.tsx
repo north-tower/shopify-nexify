@@ -45,7 +45,7 @@ const Checkout = () => {
     },
   });
 
-  const { register, handleSubmit, watch } = useForm<CheckoutFormData>({
+  const { register, handleSubmit, watch } = useForm({
     defaultValues: {
       country: "Kenya",
       saveInfo: true,
@@ -71,7 +71,7 @@ const Checkout = () => {
     return getTotalPrice() + shippingCost + customTip;
   };
 
-  const onSubmit = async (data: CheckoutFormData) => {
+  const onSubmit = async (data) => {
     if (!session?.user) {
       toast.error("Please login to complete your order");
       return;
@@ -80,7 +80,6 @@ const Checkout = () => {
     try {
       setIsSubmitting(true);
 
-      // Create shipping address object
       const shippingAddress = {
         firstName: data.firstName,
         lastName: data.lastName,
@@ -91,12 +90,10 @@ const Checkout = () => {
         phone: data.phone,
       };
 
-      // Use billing address same as shipping if not using different billing, else use different billing address
       const billingAddress = data.useDifferentBilling 
-        ? { ...shippingAddress }  // you may want to add separate billing fields later
+        ? { ...shippingAddress }  
         : shippingAddress;
 
-      // Query numeric user ID for orders.user_id insert using user email mapped in tbl_user
       const { data: userData, error: userError } = await supabase
         .from("tbl_user")
         .select("userid")
@@ -112,15 +109,14 @@ const Checkout = () => {
 
       const numericUserId = userData.userid;
 
-      // Create order with numeric user_id
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
-          user_id: numericUserId, // numeric user id from user table
+          user_id: numericUserId, // numeric user id (number)
           order_number: `ORD-${Date.now()}`,
           total_amount: calculateTotal(),
-          shipping_address: shippingAddress,
-          billing_address: billingAddress,
+          shipping_address: JSON.stringify(shippingAddress),
+          billing_address: JSON.stringify(billingAddress),
           order_status: 'pending',
           payment_status: 'unpaid',
           payment_method: 'pending'
@@ -133,7 +129,6 @@ const Checkout = () => {
         throw orderError;
       }
 
-      // Create order items
       const orderItems = items.map(item => ({
         order_id: orderData.id,
         product_id: item.id,
@@ -153,7 +148,6 @@ const Checkout = () => {
         throw itemsError;
       }
 
-      // Clear cart and show success message
       clearCart();
       toast.success("Order placed successfully!");
       navigate('/');
@@ -171,9 +165,7 @@ const Checkout = () => {
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Checkout Form */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Contact Information */}
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4">Contact</h2>
               <div className="space-y-4">
@@ -193,7 +185,6 @@ const Checkout = () => {
               </div>
             </div>
 
-            {/* Delivery Information */}
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4">Delivery</h2>
               <div className="space-y-4">
@@ -256,7 +247,6 @@ const Checkout = () => {
               </div>
             </div>
 
-            {/* Shipping Method */}
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4">Shipping method</h2>
               <div className="border rounded p-4 flex justify-between items-center">
@@ -265,7 +255,6 @@ const Checkout = () => {
               </div>
             </div>
 
-            {/* Payment */}
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4">Payment</h2>
               <div className="border rounded p-4">
@@ -280,7 +269,6 @@ const Checkout = () => {
               </div>
             </div>
 
-            {/* Billing Address */}
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4">Billing address</h2>
               <div className="space-y-4">
@@ -307,7 +295,6 @@ const Checkout = () => {
               </div>
             </div>
 
-            {/* Tip Section */}
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4">Add tip</h2>
               <div className="space-y-4">
@@ -383,7 +370,6 @@ const Checkout = () => {
             </div>
           </div>
 
-          {/* Order Summary */}
           <div className="lg:col-span-1">
             <div className="bg-white p-6 rounded-lg shadow sticky top-4">
               <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
