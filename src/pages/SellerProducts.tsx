@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -45,8 +44,8 @@ const SellerProducts = () => {
   
   const [sellerId, setSellerId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("");
-  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [categoryFilter, setCategoryFilter] = useState<string | undefined>(undefined); // Use undefined for initial/cleared state
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined); // Use undefined for initial/cleared state
   const [sortBy, setSortBy] = useState<string>("newest");
 
   // Fetch seller ID
@@ -87,8 +86,11 @@ const SellerProducts = () => {
     enabled: !!sellerId
   });
 
-  // Get unique categories for filter
-  const categories = [...new Set(products?.map(product => product.category).filter(Boolean))];
+  // Get unique categories for filter, ensuring no empty or whitespace-only strings
+  const validCategories = products
+    ?.map(product => product.category)
+    .filter((category): category is string => typeof category === 'string' && category.trim() !== '');
+  const categories = [...new Set(validCategories)];
   
   // Handle product deletion
   const handleDeleteProduct = async (productId: number) => {
@@ -121,8 +123,8 @@ const SellerProducts = () => {
       product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (product.category && product.category.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const matchesCategory = categoryFilter ? product.category === categoryFilter : true;
-    const matchesStatus = statusFilter ? product.status === statusFilter : true;
+    const matchesCategory = categoryFilter ? product.category === categoryFilter : true; // Check if categoryFilter is truthy (not undefined)
+    const matchesStatus = statusFilter ? product.status === statusFilter : true; // Check if statusFilter is truthy (not undefined)
     
     return matchesSearch && matchesCategory && matchesStatus;
   }).sort((a, b) => {
@@ -194,45 +196,60 @@ const SellerProducts = () => {
             />
           </div>
           
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All Categories</SelectItem>
-              {categories.map(category => (
-                <SelectItem key={category} value={category}>{category}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* Conditionally render category filter only when data is loaded and categories exist */}
+          {!isLoading && categories.length > 0 && (
+            <Select 
+              value={categoryFilter} 
+              onValueChange={(value) => setCategoryFilter(value === "all" ? undefined : value)} // Set undefined if "all" is selected
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem> {/* Use "all" value */}
+                {categories.map((category, index) => (
+                  <SelectItem key={`${category}-${index}`} value={category}>{category}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All Statuses</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="archived">Archived</SelectItem>
-            </SelectContent>
-          </Select>
+          {/* Conditionally render status filter */}
+          {!isLoading && (
+            <Select 
+              value={statusFilter} 
+              onValueChange={(value) => setStatusFilter(value === "all" ? undefined : value)} // Set undefined if "all" is selected
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem> {/* Use "all" value */}
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
           
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger>
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest First</SelectItem>
-              <SelectItem value="oldest">Oldest First</SelectItem>
-              <SelectItem value="name-asc">Name (A-Z)</SelectItem>
-              <SelectItem value="name-desc">Name (Z-A)</SelectItem>
-              <SelectItem value="price-asc">Price (Low to High)</SelectItem>
-              <SelectItem value="price-desc">Price (High to Low)</SelectItem>
-              <SelectItem value="stock-asc">Stock (Low to High)</SelectItem>
-              <SelectItem value="stock-desc">Stock (High to Low)</SelectItem>
-            </SelectContent>
-          </Select>
+          {/* Conditionally render sort dropdown */}
+          {!isLoading && (
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="oldest">Oldest First</SelectItem>
+                <SelectItem value="name-asc">Name (A-Z)</SelectItem>
+                <SelectItem value="name-desc">Name (Z-A)</SelectItem>
+                <SelectItem value="price-asc">Price (Low to High)</SelectItem>
+                <SelectItem value="price-desc">Price (High to Low)</SelectItem>
+                <SelectItem value="stock-asc">Stock (Low to High)</SelectItem>
+                <SelectItem value="stock-desc">Stock (High to Low)</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
         
         {/* Products table */}
@@ -292,8 +309,8 @@ const SellerProducts = () => {
                           variant="link" 
                           onClick={() => {
                             setSearchTerm("");
-                            setCategoryFilter("");
-                            setStatusFilter("");
+                            setCategoryFilter(undefined); // Clear to undefined
+                            setStatusFilter(undefined); // Clear to undefined
                           }}
                           className="mt-2"
                         >

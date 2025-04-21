@@ -1,7 +1,6 @@
-
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/navbar/Navbar";
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 import { LayoutDashboard, Package, ShoppingCart, TrendingUp, Settings } from "lucide-react";
 
