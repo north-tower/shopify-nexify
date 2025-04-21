@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Lock, Mail, User } from "lucide-react";
+import { Lock, Mail, User, Eye, EyeOff, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -17,6 +18,8 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [forgotPassword, setForgotPassword] = useState(false);
   const isSeller = location.search.includes('seller=true');
 
   useEffect(() => {
@@ -48,6 +51,21 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      if (forgotPassword) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth/reset-password`,
+        });
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Password reset email sent",
+          description: "Check your email for the password reset link",
+        });
+        setForgotPassword(false);
+        return;
+      }
+
       if (isSignUp) {
         // Handle sign up
         console.log("Signing up with:", email, password);
@@ -141,78 +159,152 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            {isSignUp ? "Create an account" : "Sign in to your account"}
-            {isSeller && " as Seller"}
-          </CardTitle>
-          <CardDescription className="text-center">
-            {isSignUp
-              ? "Enter your details below to create your account"
-              : "Enter your email below to sign in to your account"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleAuth} className="space-y-4">
-            {isSignUp && (
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
+      >
+        <Card className="shadow-lg">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-center">
+              {forgotPassword 
+                ? "Reset Password" 
+                : isSignUp 
+                  ? "Create an account" 
+                  : "Welcome back"}
+              {isSeller && " as Seller"}
+            </CardTitle>
+            <CardDescription className="text-center">
+              {forgotPassword
+                ? "Enter your email to reset your password"
+                : isSignUp
+                  ? "Enter your details below to create your account"
+                  : "Enter your email below to sign in to your account"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleAuth} className="space-y-4">
+              {isSignUp && !forgotPassword && (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="relative"
+                >
+                  <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Full Name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="pl-10"
+                    required={isSignUp}
+                  />
+                </motion.div>
+              )}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+                className="relative"
+              >
+                <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <Input
-                  type="text"
-                  placeholder="Full Name"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
-                  required={isSignUp}
+                  required
                 />
-              </div>
-            )}
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-10"
-                required
-              />
+              </motion.div>
+              {!forgotPassword && (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="relative"
+                >
+                  <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 pr-10"
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
+                </motion.div>
+              )}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : forgotPassword ? (
+                    "Send Reset Link"
+                  ) : isSignUp ? (
+                    "Sign Up"
+                  ) : (
+                    "Sign In"
+                  )}
+                </Button>
+              </motion.div>
+            </form>
+            <div className="mt-4 space-y-2 text-center">
+              {!forgotPassword && (
+                <Button
+                  variant="link"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="text-sm"
+                >
+                  {isSignUp
+                    ? "Already have an account? Sign in"
+                    : "Don't have an account? Sign up"}
+                </Button>
+              )}
+              {!isSignUp && !forgotPassword && (
+                <Button
+                  variant="link"
+                  onClick={() => setForgotPassword(true)}
+                  className="text-sm"
+                >
+                  Forgot your password?
+                </Button>
+              )}
+              {forgotPassword && (
+                <Button
+                  variant="link"
+                  onClick={() => setForgotPassword(false)}
+                  className="text-sm"
+                >
+                  Back to sign in
+                </Button>
+              )}
             </div>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <Input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pl-10"
-                required
-                minLength={6}
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading}
-            >
-              {loading ? "Loading..." : isSignUp ? "Sign Up" : "Sign In"}
-            </Button>
-          </form>
-          <div className="mt-4 text-center">
-            <Button
-              variant="link"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm"
-            >
-              {isSignUp
-                ? "Already have an account? Sign in"
-                : "Don't have an account? Sign up"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { format, subDays, subMonths } from "date-fns";
 import { 
@@ -54,7 +53,7 @@ const SellerAnalytics = () => {
 
   // Calculate revenue trends
   const getRevenueTrend = () => {
-    if (monthlySalesData.length < 2) return "neutral";
+    if (!monthlySalesData || monthlySalesData.length < 2) return "neutral";
     
     const lastMonth = monthlySalesData[monthlySalesData.length - 1]?.amount || 0;
     const previousMonth = monthlySalesData[monthlySalesData.length - 2]?.amount || 0;
@@ -251,7 +250,7 @@ const SellerAnalytics = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="h-[300px]">
-                  {categoryData.length === 0 ? (
+                  {!categoryData || categoryData.length === 0 ? (
                     <div className="h-full flex items-center justify-center text-muted-foreground">
                       No category data available
                     </div>
@@ -292,7 +291,7 @@ const SellerAnalytics = () => {
                     <div className="h-full flex items-center justify-center">
                       Loading product data...
                     </div>
-                  ) : salesData.length === 0 ? (
+                  ) : !salesData || salesData.length === 0 ? (
                     <div className="h-full flex items-center justify-center text-muted-foreground">
                       No product data available
                     </div>
@@ -305,12 +304,12 @@ const SellerAnalytics = () => {
                               {index + 1}
                             </div>
                             <div>
-                              <p className="font-medium">{sale.product_name}</p>
-                              <p className="text-sm text-muted-foreground">SKU: {sale.sku}</p>
+                              <p className="font-medium">{sale.products?.product_name}</p>
+                              <p className="text-sm text-muted-foreground">SKU: {sale.products?.id}</p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="font-medium">KSh {sale.total_price?.toLocaleString()}</p>
+                            <p className="font-medium">KSh {sale.sale_amount?.toLocaleString()}</p>
                             <p className="text-sm text-muted-foreground">Qty: {sale.quantity}</p>
                           </div>
                         </div>

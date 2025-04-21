@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
@@ -159,6 +158,134 @@ export const useSalesData = (sellerId: string | null) => {
       ).map(([name, value]) => ({ name, value }))
     : [];
 
+  // Get orders timeline data
+  const { data: ordersTimelineData, isLoading: isLoadingOrdersTimeline } = useQuery({
+    queryKey: ['orders-timeline', sellerId],
+    queryFn: async () => {
+      if (!sellerId) return null;
+      
+      const { data } = await supabase
+        .from('orders')
+        .select(`
+          id,
+          created_at,
+          order_status,
+          total_amount,
+          order_items (
+            quantity,
+            products (
+              product_name
+            )
+          )
+        `)
+        .eq('seller_id', sellerId)
+        .order('created_at', { ascending: true });
+      
+      // Group orders by date
+      const ordersByDate = new Map();
+      data?.forEach(order => {
+        const date = new Date(order.created_at).toISOString().split('T')[0];
+        if (!ordersByDate.has(date)) {
+          ordersByDate.set(date, {
+            date,
+            orders: 0,
+            revenue: 0,
+            items: 0
+          });
+        }
+        const dayData = ordersByDate.get(date);
+        dayData.orders += 1;
+        dayData.revenue += Number(order.total_amount);
+        dayData.items += order.order_items.reduce((sum, item) => sum + item.quantity, 0);
+      });
+      
+      return Array.from(ordersByDate.values());
+    },
+    enabled: !!sellerId
+  });
+
+  // Get product performance data
+  const { data: productPerformanceData, isLoading: isLoadingProductPerformance } = useQuery({
+    queryKey: ['product-performance', sellerId],
+    queryFn: async () => {
+      if (!sellerId) return null;
+      
+      const { data } = await supabase
+        .from('products')
+        .select(`
+          id,
+          product_name,
+          price,
+          stock_quantity,
+          sales (
+            quantity,
+            sale_amount,
+            created_at
+          )
+        `)
+        .eq('seller_id', sellerId);
+      
+      return data?.map(product => ({
+        id: product.id,
+        name: product.product_name,
+        price: product.price,
+        stock: product.stock_quantity,
+        totalSales: product.sales.reduce((sum, sale) => sum + sale.quantity, 0),
+        totalRevenue: product.sales.reduce((sum, sale) => sum + Number(sale.sale_amount), 0),
+        salesTrend: product.sales.map(sale => ({
+          date: sale.created_at,
+          quantity: sale.quantity
+        }))
+      }));
+    },
+    enabled: !!sellerId
+  });
+
+  // Get customer analytics data
+  const { data: customerAnalyticsData, isLoading: isLoadingCustomerAnalytics } = useQuery({
+    queryKey: ['customer-analytics', sellerId],
+    queryFn: async () => {
+      if (!sellerId) return null;
+      
+      const { data } = await supabase
+        .from('orders')
+        .select(`
+          user_id,
+          created_at,
+          total_amount,
+          users (
+            email,
+            created_at
+          )
+        `)
+        .eq('seller_id', sellerId);
+      
+      // Group by customer
+      const customers = new Map();
+      data?.forEach(order => {
+        if (!customers.has(order.user_id)) {
+          customers.set(order.user_id, {
+            id: order.user_id,
+            email: order.users?.email,
+            joinDate: order.users?.created_at,
+            totalOrders: 0,
+            totalSpent: 0,
+            lastOrder: null
+          });
+        }
+        const customer = customers.get(order.user_id);
+        customer.totalOrders += 1;
+        customer.totalSpent += Number(order.total_amount);
+        if (!customer.lastOrder || new Date(order.created_at) > new Date(customer.lastOrder)) {
+          customer.lastOrder = order.created_at;
+        }
+      });
+      
+      return Array.from(customers.values());
+    },
+    enabled: !!sellerId
+  });
+
   return {
     salesData,
     isLoadingSales,
@@ -171,6 +298,12 @@ export const useSalesData = (sellerId: string | null) => {
     totalOrders,
     averageOrderValue,
     chartData,
-    categoryData
+    categoryData,
+    ordersTimelineData,
+    isLoadingOrdersTimeline,
+    productPerformanceData,
+    isLoadingProductPerformance,
+    customerAnalyticsData,
+    isLoadingCustomerAnalytics
   };
 };
