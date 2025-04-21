@@ -96,14 +96,27 @@ const Checkout = () => {
         ? { ...shippingAddress }  // you may want to add separate billing fields later
         : shippingAddress;
 
-      // Use the user ID as string UUID from session.user.id directly (no number conversion)
-      const userId = session.user.id; 
+      // Query numeric user ID for orders.user_id insert using user email mapped in tbl_user
+      const { data: userData, error: userError } = await supabase
+        .from("tbl_user")
+        .select("userid")
+        .eq("email", session.user.email)
+        .single();
 
-      // Create order
+      if (userError || !userData) {
+        console.error("Error fetching numeric user ID:", userError);
+        toast.error("Unable to get user info for order. Please contact support.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const numericUserId = userData.userid;
+
+      // Create order with numeric user_id
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
-          user_id: userId, // use UUID string directly
+          user_id: numericUserId, // numeric user id from user table
           order_number: `ORD-${Date.now()}`,
           total_amount: calculateTotal(),
           shipping_address: shippingAddress,

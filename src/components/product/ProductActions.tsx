@@ -28,19 +28,34 @@ export const ProductActions = ({
 
   const handleBuyNow = async () => {
     try {
+      // Get current user from supabase auth
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         toast.error("Please login to place an order");
         return;
       }
 
-      // Use user.id as string (UUID) directly, don't convert to numeric ID
-      // Create order
+      // Query numeric user ID from tbl_user where email = user.email
+      const { data: userData, error: userError } = await supabase
+        .from("tbl_user")
+        .select("userid")
+        .eq("email", user.email)
+        .single();
+
+      if (userError || !userData) {
+        console.error("Error fetching numeric user ID:", userError);
+        toast.error("Unable to get user info for order. Please contact support.");
+        return;
+      }
+
+      const numericUserId = userData.userid;
+
+      // Create order with numeric user_id
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
-          user_id: user.id, // use string UUID user id
+          user_id: numericUserId, // numeric user id from users table
           order_number: `ORD-${Date.now()}`,
           total_amount: price * quantity,
           shipping_address: {},
@@ -130,3 +145,4 @@ export const ProductActions = ({
     </div>
   );
 };
+
