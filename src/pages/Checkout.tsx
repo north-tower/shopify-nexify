@@ -91,21 +91,19 @@ const Checkout = () => {
         phone: data.phone,
       };
 
-      // Use shipping address as billing if not using different billing
+      // Use billing address same as shipping if not using different billing, else use different billing address
       const billingAddress = data.useDifferentBilling 
-        ? { ...shippingAddress } 
+        ? { ...shippingAddress }  // you may want to add separate billing fields later
         : shippingAddress;
 
-      // Convert UUID to numeric ID using the same method as RLS policy
-      const numericId = Number(
-        BigInt('0x' + session.user.id.replace(/-/g, '')) % BigInt(9223372036854775807)
-      );
+      // Use the user ID as string UUID from session.user.id directly (no number conversion)
+      const userId = session.user.id; 
 
       // Create order
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
-          user_id: numericId,
+          user_id: userId, // use UUID string directly
           order_number: `ORD-${Date.now()}`,
           total_amount: calculateTotal(),
           shipping_address: shippingAddress,

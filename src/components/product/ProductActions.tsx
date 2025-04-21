@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
@@ -34,11 +35,12 @@ export const ProductActions = ({
         return;
       }
 
+      // Use user.id as string (UUID) directly, don't convert to numeric ID
       // Create order
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
-          user_id: parseInt(user.id),
+          user_id: user.id, // use string UUID user id
           order_number: `ORD-${Date.now()}`,
           total_amount: price * quantity,
           shipping_address: {},
